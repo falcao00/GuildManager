@@ -12,6 +12,17 @@ export type StatModifier = {
   stats: Partial<Stats>;
 };
 
+/** Item que o aventureiro está carregando. Formato provisório: será detalhado quando existirem itens. */
+export type HeldItem = { id: string; name: string; quantity: number };
+
+/** Uma entrada do histórico de aventuras (recrutamento, missões, lutas...). */
+export type AdventureRecord = {
+  /** Quando aconteceu (ms, hora real). */
+  at: number;
+  kind: 'entrada' | 'missao' | 'gvg' | 'rank';
+  text: string;
+};
+
 /** Dados salvos de um aventureiro (JSON puro, vai para o save). */
 export type AdventurerData = {
   id: string;
@@ -25,7 +36,16 @@ export type AdventurerData = {
   health: number;
   resource: number;
   modifiers: StatModifier[];
+  /** Loot que está carregando agora (saves antigos podem não ter). */
+  items?: HeldItem[];
+  /** Histórico de aventuras, do mais antigo para o mais novo (saves antigos podem não ter). */
+  history?: AdventureRecord[];
 };
+
+/** Registra um acontecimento no histórico do aventureiro. */
+export function addHistory(a: AdventurerData, kind: AdventureRecord['kind'], text: string, at = Date.now()) {
+  (a.history ??= []).push({ at, kind, text });
+}
 
 export const clampStat = (v: number) => Math.max(STAT_MIN, Math.min(STAT_MAX, v));
 
@@ -75,6 +95,8 @@ export function createAdventurer(name: string, classId: ClassId, raceId: RaceId,
     health: 0,
     resource: 0,
     modifiers: [],
+    items: [],
+    history: [],
   };
   a.health = maxHealth(a);
   a.resource = maxResource(a);
@@ -93,6 +115,7 @@ export function addExperience(a: AdventurerData, amount: number): Rank[] {
     needed = XP_TO_NEXT_RANK[a.rank];
   }
   if (needed === null) a.xp = 0;
+  for (const r of promoted) addHistory(a, 'rank', `Subiu para o rank ${r}`);
   if (promoted.length) {
     a.health = maxHealth(a);
     a.resource = maxResource(a);

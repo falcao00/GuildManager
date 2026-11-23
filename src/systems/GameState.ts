@@ -1,7 +1,7 @@
 import { ENERGY_MAX, ENERGY_REGEN_MS, STARTING_GOLD } from '../data/config';
 import type { CityId } from '../data/world';
 import { DAILY_CANDIDATES, RECRUIT_COST } from '../data/recruitment';
-import type { AdventurerData } from './Adventurer';
+import { addHistory, type AdventurerData } from './Adventurer';
 import { generateCandidates } from './AdventurerGenerator';
 import { gameDayIndex } from './GameClock';
 
@@ -81,6 +81,7 @@ export class GameState {
   static newGame(city: CityId, guild: Omit<GuildData, 'gold' | 'prestige'>): GameState {
     if (GameState.readSave()) throw new Error('O jogador já tem uma guilda');
     const now = Date.now();
+    for (const a of guild.adventurers) addHistory(a, 'entrada', `Membro fundador da guilda ${guild.name}`, now);
     GameState.current = new GameState({
       version: 1,
       city,
@@ -161,6 +162,7 @@ export class GameState {
     const cost = RECRUIT_COST[c.rank];
     if (this.guild.gold < cost) return `Ouro insuficiente: precisa de ${cost}.`;
     this.guild.gold -= cost;
+    addHistory(c, 'entrada', `Recrutado pela guilda por ${cost} de ouro`);
     this.guild.adventurers.push(c);
     candidates.splice(candidates.indexOf(c), 1);
     this.save();
