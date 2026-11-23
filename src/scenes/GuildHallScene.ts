@@ -1,7 +1,6 @@
 import * as Phaser from 'phaser';
 import { getCity } from '../data/world';
 import { GameState } from '../systems/GameState';
-import { adventurerCard } from '../ui/AdventurerCard';
 import { Button } from '../ui/Button';
 import { loadEmblemTexture } from '../ui/emblems';
 import { TopBar, TOP_BAR_HEIGHT } from '../ui/TopBar';
@@ -10,16 +9,16 @@ import { COLORS, FONT } from '../ui/theme';
 const ACTIVITIES = [
   { label: 'Missões', scene: 'Missions' },
   { label: 'Recrutamento', scene: 'Recruitment' },
-  { label: 'Guilda vs Guilda', scene: 'GuildVsGuild' },
+  { label: 'Campo de Treino', scene: 'Training' },
+  { label: 'Labirinto', scene: 'Labyrinth' },
+  { label: 'Duelos', scene: 'Duels' },
   { label: 'Inventário', scene: 'Inventory' },
+  { label: 'Melhorias', scene: 'Upgrades' },
+  { label: 'Correio', scene: 'Mail' },
 ];
-const CARDS_PER_PAGE = 3;
 
 /** Tela principal: o salão da guilda. */
 export class GuildHallScene extends Phaser.Scene {
-  private page = 0;
-  private cards: Phaser.GameObjects.Container[] = [];
-
   constructor() {
     super('GuildHall');
   }
@@ -28,8 +27,6 @@ export class GuildHallScene extends Phaser.Scene {
     const state = GameState.get();
     const { guild } = state;
     const { width } = this.scale;
-    this.page = 0;
-    this.cards = [];
 
     new TopBar(this);
 
@@ -39,41 +36,26 @@ export class GuildHallScene extends Phaser.Scene {
     const emblem = this.add.image(90, top + 60, 'emblem-espada').setDisplaySize(96, 96).setVisible(false);
     this.add.text(160, top + 30, guild.name, FONT.title).setOrigin(0, 0.5);
     this.add.text(162, top + 72, `Guilda de ${getCity(state.data.city).name}`, FONT.small).setOrigin(0, 0.5);
-    this.add.text(162, top + 100, `Ouro ${guild.gold}    Prestígio ${guild.prestige}`, FONT.body).setOrigin(0, 0.5);
+    this.add.text(162, top + 100, `Ouro ${guild.gold}    Prestígio ${guild.prestige}    Aventureiros ${guild.adventurers.length}`, FONT.body).setOrigin(0, 0.5);
 
-    // Atividades: botões no centro, logo abaixo das informações da guilda
-    const btnW = 230;
-    const gap = 20;
-    const startX = width / 2 - ((btnW + gap) * ACTIVITIES.length - gap) / 2 + btnW / 2;
+    // Atividades: grade de pares (2 por linha) no centro do espaço abaixo do cabeçalho;
+    // se sobrar um botão sozinho na última linha, ele fica centralizado.
+    const btnW = 340;
+    const btnH = 70;
+    const gap = 16;
+    const rows = Math.ceil(ACTIVITIES.length / 2);
+    const centerY = (top + 120 + this.scale.height) / 2;
+    const firstY = centerY - ((rows - 1) * (btnH + gap)) / 2;
     ACTIVITIES.forEach((act, i) => {
-      new Button(this, startX + i * (btnW + gap), 230, act.label, () => this.scene.start(act.scene), { width: btnW, height: 48, fontSize: 19 });
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const alone = i === ACTIVITIES.length - 1 && col === 0;
+      const x = alone ? width / 2 : width / 2 + (col === 0 ? -1 : 1) * (btnW + gap) / 2;
+      const y = firstY + row * (btnH + gap);
+      new Button(this, x, y, act.label, () => this.scene.start(act.scene), { width: btnW, height: btnH, fontSize: 22 });
     });
-
-    // Aventureiros (3 por página)
-    this.add.text(40, 285, `Aventureiros (${guild.adventurers.length})`, FONT.heading).setOrigin(0, 0.5);
-    const pages = Math.ceil(guild.adventurers.length / CARDS_PER_PAGE);
-    if (pages > 1) {
-      const pageText = this.add.text(width - 130, 285, '', FONT.body).setOrigin(0.5);
-      const go = (delta: number) => {
-        this.page = (this.page + delta + pages) % pages;
-        pageText.setText(`${this.page + 1} / ${pages}`);
-        this.showPage();
-      };
-      new Button(this, width - 200, 285, '◀', () => go(-1), { width: 44, height: 36 });
-      new Button(this, width - 60, 285, '▶', () => go(1), { width: 44, height: 36 });
-      pageText.setText(`1 / ${pages}`);
-    }
-    this.showPage();
 
     const key = await loadEmblemTexture(this, guild.emblem);
     if (emblem.active) emblem.setTexture(key).setDisplaySize(96, 96).setVisible(true);
-  }
-
-  private showPage() {
-    this.cards.forEach((c) => c.destroy());
-    const list = GameState.get().guild.adventurers.slice(this.page * CARDS_PER_PAGE, (this.page + 1) * CARDS_PER_PAGE);
-    const cardW = 390;
-    const gap = 20;
-    this.cards = list.map((a, i) => adventurerCard(this, 40 + cardW / 2 + i * (cardW + gap), 480, cardW, 320, a, 'full').container);
   }
 }

@@ -1,6 +1,7 @@
 import { CLASSES, RACES, type ClassId, type RaceId, type Rank, type Stats } from '../data/adventurers';
 import { rankOddsFor } from '../data/recruitment';
-import { clampStat, createAdventurer, typicalStats, type AdventurerData } from './Adventurer';
+import { STARTING_STAT_TOTAL, STAT_MAX, STAT_MIN } from '../data/config';
+import { createAdventurer, type AdventurerData } from './Adventurer';
 
 /** Nomes sugeridos por raça. */
 export const NAMES: Record<RaceId, string[]> = {
@@ -21,14 +22,18 @@ function shuffle<T>(list: readonly T[]): T[] {
   return a;
 }
 
-/** Status = típico da classe + raça, com variação aleatória de -1 a +1 em cada um (0 a 10). */
-export function rollStats(classId: ClassId, raceId: RaceId): Stats {
-  const t = typicalStats(classId, raceId);
-  return {
-    strength: clampStat(t.strength + randInt(-1, 1)),
-    speed: clampStat(t.speed + randInt(-1, 1)),
-    intelligence: clampStat(t.intelligence + randInt(-1, 1)),
-  };
+/**
+ * Status iniciais: distribuídos de forma aleatória, cada um entre 0 e 10, somando sempre
+ * STARTING_STAT_TOTAL (15). Classe e raça não influenciam o sorteio.
+ * Todas as combinações válidas têm a mesma chance.
+ */
+export function rollStats(_classId?: ClassId, _raceId?: RaceId): Stats {
+  for (;;) {
+    const strength = randInt(STAT_MIN, STAT_MAX);
+    const speed = randInt(STAT_MIN, STAT_MAX);
+    const intelligence = STARTING_STAT_TOTAL - strength - speed;
+    if (intelligence >= STAT_MIN && intelligence <= STAT_MAX) return { strength, speed, intelligence };
+  }
 }
 
 /** Nome aleatório para a raça, evitando os nomes já usados. */

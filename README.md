@@ -53,7 +53,7 @@ A pasta `dist/` é um site estático: basta enviar o conteúdo dela para qualque
 ```
 public/assets/    imagens, sons e fontes
 src/main.ts       configuração do Phaser e lista de cenas
-src/scenes/       telas do jogo (cidades, criação da guilda, salão, recrutamento...)
+src/scenes/       telas do jogo (cidades, criação da guilda, salão, missões, recrutamento, treino, labirinto, duelos, inventário, melhorias, correio)
 src/systems/      lógica do jogo (estado e save, aventureiros, relógio do jogo)
 src/ui/           componentes de interface (botões, barra superior, cartões...)
 src/data/         constantes e dados de balanceamento
@@ -71,3 +71,37 @@ O jogo salva no `localStorage` do navegador (chave `guildmanager:save`). Para co
 4. **Salão da guilda**: barra superior com data do jogo (começa no Dia 01, Ano 01 e avança 1 dia por dia real), hora de Brasília e energia. Abaixo das informações da guilda ficam as atividades: Missões, Recrutamento, Guilda vs Guilda e Inventário.
 
 Regras dos aventureiros ficam em `src/data/adventurers.ts` (status por classe e raça, ranks, XP). O sorteio fica em `src/systems/AdventurerGenerator.ts`. Preços de recrutamento e chances de rank por prestígio ficam em `src/data/recruitment.ts`.
+
+## Status
+
+Força, Velocidade e Inteligência vão de 0 a 10. Todo aventureiro novo (os 3 iniciais e os candidatos do Recrutamento) recebe os status sorteados de forma aleatória, somando sempre 15. Classe e raça não influenciam o sorteio. Depois disso os status só mudam por armas, armaduras, maldições e buffs.
+
+## Regras de combate
+
+Ficam em `src/systems/Combat.ts` (fórmulas e simulação de luta) e `src/data/combat.ts` (números de balanceamento).
+
+- **Força** define o dano corpo a corpo (armado ou desarmado): Guerreiro 2 × Força, Clérigo 1,8 ×, Ladino 1,5 ×, Mago 1,2 ×.
+- **Inteligência** define o dano mágico: Mago 2 × Inteligência, Clérigo 1,8 ×. Guerreiro e Ladino não usam magia.
+- Cada ataque usa o maior valor entre o dano corpo a corpo e o mágico.
+- **Velocidade** define a cadência: 30% de chance de 2 ataques na rodada, +5% a cada 10 de Velocidade (como o status vai de 0 a 10, é proporcional: +0,5% por ponto, máximo 35%). Quem tem mais Velocidade age primeiro; empate é sorteado.
+- Cada ataque gasta 10 de Stamina/Mana; o ataque duplo gasta o dobro (20). Sem recurso para o duplo, ataca uma vez; sem recurso nenhum, ataca uma vez com metade do dano.
+- Uma luta tem no máximo 50 rodadas; depois disso é empate.
+
+## Melhorias
+
+Compradas com ouro no salão (botão Melhorias). Valores em `src/data/upgrades.ts`.
+
+| Melhoria | Níveis (1 a 5) | Custo para subir |
+| --- | --- | --- |
+| Dormitórios (limite de aventureiros) | 6 / 10 / 15 / 20 / 30 | 300 / 800 / 2000 / 5000 |
+| Quadro de Missões (missões disponíveis) | 3 / 5 / 7 / 10 / 15 | 250 / 700 / 1800 / 4500 |
+| Arsenal (espaços de loot) | 16 / 24 / 32 / 40 / 48 | 200 / 600 / 1500 / 4000 |
+
+## Campo de Treino, Labirinto e Correio
+
+Valores em `src/data/activities.ts`.
+
+- **Campo de Treino:** custa 10 de energia e leva 4 horas reais; ao concluir, +1 no status escolhido (máximo 10).
+- **Labirinto (Dungeon Eterna):** entrar custa 10 de energia. A cada hora completa lá dentro o aventureiro acha ouro (D 5, C 8, B 12, A 18, S 25, SS 35 por hora) e tem 10% de chance de achar um item. Ao retirar, o ouro vai para a guilda e os itens ficam com o aventureiro.
+- Aventureiro treinando ou no Labirinto fica ocupado: não pode treinar de novo, duelar nem ser liberado.
+- **Correio:** caixa de entrada, enviadas e escrever. Ainda não há servidor: as outras guildas são fictícias e as mensagens ficam salvas só no navegador.

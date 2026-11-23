@@ -1,13 +1,14 @@
 import * as Phaser from 'phaser';
 import { CLASSES, RACES, RESOURCE_LABELS, XP_TO_NEXT_RANK } from '../data/adventurers';
 import { effectiveStats, maxHealth, maxResource, resourceType, type AdventurerData } from '../systems/Adventurer';
+import { adventurerPanel } from './AdventurerPanel';
 import { StatBars } from './StatBars';
 import { COLORS, FONT, css } from './theme';
 
 const RESOURCE_COLOR = { mana: 0x4a7bc9, stamina: 0x5aa05a } as const;
 
 /**
- * Cartão de aventureiro.
+ * Cartão de aventureiro. Clicar no cartão abre o painel com os detalhes.
  * - full: nome, rank, classe/raça, status, Vida, Stamina/Mana e experiência (salão).
  * - compact: versão menor para listas (recrutamento, Guilda vs Guilda).
  */
@@ -48,10 +49,12 @@ export function adventurerCard(
     c.add(stats);
     c.add(scene.add.text(left, top + 160, `Vida ${maxHealth(a)} · ${RESOURCE_LABELS[res]} ${maxResource(a)}`, FONT.small).setOrigin(0, 0.5));
   }
+  bg.setInteractive({ useHandCursor: true });
+  bg.on('pointerup', () => adventurerPanel(scene, a));
   return { container: c, background: bg };
 }
 
-function bar(scene: Phaser.Scene, c: Phaser.GameObjects.Container, x: number, y: number, w: number, label: string, value: number, max: number, color: number) {
+export function bar(scene: Phaser.Scene, c: Phaser.GameObjects.Container, x: number, y: number, w: number, label: string, value: number, max: number, color: number) {
   c.add([
     scene.add.text(x, y, label, FONT.small).setOrigin(0, 0.5),
     scene.add.text(x + w, y, `${value} / ${max}`, FONT.small).setOrigin(1, 0.5),
@@ -59,3 +62,4 @@ function bar(scene: Phaser.Scene, c: Phaser.GameObjects.Container, x: number, y:
     scene.add.rectangle(x, y + 18, (w * Math.min(value, max)) / max, 10, color).setOrigin(0, 0.5),
   ]);
 }
+

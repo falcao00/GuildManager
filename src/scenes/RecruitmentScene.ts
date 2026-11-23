@@ -5,6 +5,7 @@ import { effectiveStats, maxHealth } from '../systems/Adventurer';
 import { msUntilNextDay } from '../systems/GameClock';
 import { GameState } from '../systems/GameState';
 import { adventurerCard } from '../ui/AdventurerCard';
+import { adventurerPanel } from '../ui/AdventurerPanel';
 import { Button } from '../ui/Button';
 import { confirmDialog, toast } from '../ui/Dialog';
 import { screenLayout } from '../ui/ScreenLayout';
@@ -38,7 +39,7 @@ export class RecruitmentScene extends Phaser.Scene {
 
     const tabs: [Tab, string][] = [
       ['candidates', 'Candidatos de hoje'],
-      ['roster', `Seus aventureiros (${guild.adventurers.length})`],
+      ['roster', `Seus aventureiros (${guild.adventurers.length}/${state.adventurerLimit})`],
     ];
     tabs.forEach(([id, label], i) => {
       new Button(this, width / 2 + (i === 0 ? -150 : 150), top + 10, label, () => this.scene.restart({ tab: id }), {
@@ -69,6 +70,15 @@ export class RecruitmentScene extends Phaser.Scene {
       return;
     }
 
+    const full = state.guild.adventurers.length >= state.adventurerLimit;
+    if (full) {
+      this.add
+        .text(width / 2, y + 360, `Dormitórios cheios (${state.adventurerLimit} aventureiros). Melhore os Dormitórios em Melhorias para recrutar mais.`, {
+          ...FONT.body,
+          color: css(COLORS.danger),
+        })
+        .setOrigin(0.5);
+    }
     const cardW = 228;
     const gap = 14;
     const cardH = 280;
@@ -86,7 +96,7 @@ export class RecruitmentScene extends Phaser.Scene {
         const error = state.recruit(c.id);
         if (error) return toast(this, error, COLORS.danger);
         this.scene.restart({ tab: 'candidates' });
-      }, { width: cardW - 30, height: 38, primary: affordable }).setEnabled(affordable);
+      }, { width: cardW - 30, height: 38, primary: affordable && !full }).setEnabled(affordable && !full);
     });
   }
 
@@ -104,10 +114,14 @@ export class RecruitmentScene extends Phaser.Scene {
     this.add.text(cols.kind, y, 'Classe · Raça', headerStyle).setOrigin(0, 0.5);
     this.add.text(cols.stats, y, 'For / Vel / Int', headerStyle).setOrigin(0, 0.5);
     this.add.text(cols.health, y, 'Vida', headerStyle).setOrigin(0, 0.5);
+    this.add.text(width - 40, y, 'Clique num aventureiro para ver os detalhes', FONT.small).setOrigin(1, 0.5);
 
     list.slice(this.page * ROWS_PER_PAGE, (this.page + 1) * ROWS_PER_PAGE).forEach((a, i) => {
       const ry = y + 40 + i * 50;
-      this.add.rectangle(width / 2, ry, width - 80, 44, i % 2 ? COLORS.bg : COLORS.panel);
+      this.add
+        .rectangle(width / 2, ry, width - 80, 44, i % 2 ? COLORS.bg : COLORS.panel)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerup', () => adventurerPanel(this, a));
       const s = effectiveStats(a);
       this.add.text(cols.name, ry, a.name, FONT.body).setOrigin(0, 0.5);
       this.add.text(cols.rank, ry, a.rank, { ...FONT.body, color: css(COLORS.gold) }).setOrigin(0, 0.5);
