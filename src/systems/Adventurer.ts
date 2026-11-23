@@ -41,7 +41,7 @@ export function typicalStats(classId: ClassId, raceId: RaceId): Stats {
 }
 
 /** Status final: base + equipamentos, maldições e buffs, sempre entre 0 e 10. */
-export function effectiveStats(a: AdventurerData): Stats {
+export function effectiveStats(a: Pick<AdventurerData, 'classId' | 'raceId' | 'stats' | 'modifiers'>): Stats {
   const s = { ...(a.stats ?? typicalStats(a.classId, a.raceId)) };
   for (const m of a.modifiers) {
     s.strength += m.stats.strength ?? 0;

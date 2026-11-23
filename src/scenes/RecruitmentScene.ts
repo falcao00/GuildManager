@@ -4,7 +4,7 @@ import { RECRUIT_COST, rankOddsFor } from '../data/recruitment';
 import { effectiveStats, maxHealth } from '../systems/Adventurer';
 import { msUntilNextDay } from '../systems/GameClock';
 import { GameState } from '../systems/GameState';
-import { adventurerCard } from '../ui/AdventurerCard';
+import { adventurerCard, combatSummary } from '../ui/AdventurerCard';
 import { Button } from '../ui/Button';
 import { confirmDialog, toast } from '../ui/Dialog';
 import { screenLayout } from '../ui/ScreenLayout';
@@ -71,7 +71,7 @@ export class RecruitmentScene extends Phaser.Scene {
 
     const cardW = 228;
     const gap = 14;
-    const cardH = 280;
+    const cardH = 300;
     const startX = width / 2 - ((cardW + gap) * candidates.length - gap) / 2 + cardW / 2;
     const cy = y + 40 + cardH / 2;
     candidates.forEach((c, i) => {
@@ -80,9 +80,9 @@ export class RecruitmentScene extends Phaser.Scene {
       const cost = RECRUIT_COST[c.rank];
       const affordable = state.guild.gold >= cost;
       this.add
-        .text(x, cy + 70, `${cost} de ouro`, { ...FONT.heading, fontSize: '20px', color: css(affordable ? COLORS.gold : COLORS.danger) })
+        .text(x, cy + 80, `${cost} de ouro`, { ...FONT.heading, fontSize: '20px', color: css(affordable ? COLORS.gold : COLORS.danger) })
         .setOrigin(0.5);
-      new Button(this, x, cy + 112, 'Recrutar', () => {
+      new Button(this, x, cy + 122, 'Recrutar', () => {
         const error = state.recruit(c.id);
         if (error) return toast(this, error, COLORS.danger);
         this.scene.restart({ tab: 'candidates' });
@@ -97,13 +97,14 @@ export class RecruitmentScene extends Phaser.Scene {
     const pages = Math.max(1, Math.ceil(list.length / ROWS_PER_PAGE));
     this.page = Math.min(this.page, pages - 1);
 
-    const cols = { name: 60, rank: 300, kind: 360, stats: 560, health: 820, action: 1120 };
+    const cols = { name: 60, rank: 250, kind: 300, stats: 480, health: 610, combat: 730, action: 1170 };
     const headerStyle = { ...FONT.small, color: css(COLORS.gold) };
     this.add.text(cols.name, y, 'Nome', headerStyle).setOrigin(0, 0.5);
     this.add.text(cols.rank, y, 'Rank', headerStyle).setOrigin(0, 0.5);
     this.add.text(cols.kind, y, 'Classe · Raça', headerStyle).setOrigin(0, 0.5);
     this.add.text(cols.stats, y, 'For / Vel / Int', headerStyle).setOrigin(0, 0.5);
     this.add.text(cols.health, y, 'Vida', headerStyle).setOrigin(0, 0.5);
+    this.add.text(cols.combat, y, 'Combate', headerStyle).setOrigin(0, 0.5);
 
     list.slice(this.page * ROWS_PER_PAGE, (this.page + 1) * ROWS_PER_PAGE).forEach((a, i) => {
       const ry = y + 40 + i * 50;
@@ -114,6 +115,7 @@ export class RecruitmentScene extends Phaser.Scene {
       this.add.text(cols.kind, ry, `${CLASSES[a.classId].name} · ${RACES[a.raceId].name}`, FONT.body).setOrigin(0, 0.5);
       this.add.text(cols.stats, ry, `${s.strength} / ${s.speed} / ${s.intelligence}`, FONT.body).setOrigin(0, 0.5);
       this.add.text(cols.health, ry, `${a.health} / ${maxHealth(a)}`, FONT.body).setOrigin(0, 0.5);
+      this.add.text(cols.combat, ry, combatSummary(a), { ...FONT.body, fontSize: '16px' }).setOrigin(0, 0.5);
       new Button(this, cols.action, ry, 'Liberar', () => {
         confirmDialog(this, {
           title: `Liberar ${a.name}?`,
