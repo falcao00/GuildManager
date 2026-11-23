@@ -1,6 +1,7 @@
 import { ENERGY_MAX, ENERGY_REGEN_MS, STARTING_GOLD } from '../data/config';
 import type { CityId } from '../data/world';
 import { DAILY_CANDIDATES, RECRUIT_COST } from '../data/recruitment';
+import { upgradeCost, upgradeValue, maxUpgradeLevel, UPGRADES, type UpgradeId } from '../data/upgrades';
 import { addHistory, type AdventurerData } from './Adventurer';
 import { generateCandidates } from './AdventurerGenerator';
 import { gameDayIndex } from './GameClock';
@@ -16,8 +17,10 @@ export type GuildData = {
   adventurers: AdventurerData[];
   /** Loot da guilda (ainda sem itens no jogo). */
   inventory?: InventoryItem[];
-  /** Os 3 aventureiros escolhidos para Guilda vs Guilda (ids). */
-  gvgTeam?: string[];
+  /** Times escolhidos para os Duelos (ids): 1 para o Single 1x1, 3 para o Equipe 3x3. */
+  duelTeams?: { single?: string[]; team?: string[] };
+  /** Nível de cada melhoria (começa no 1). */
+  upgrades?: Partial<Record<UpgradeId, number>>;
 };
 
 /** Item de loot. Formato provisório: será detalhado quando existirem itens. */
@@ -66,6 +69,12 @@ export class GameState {
       const data = JSON.parse(raw) as SaveData;
       data.foundedAt ??= Date.now();
       GameState.undoScaleExperiment(data);
+      // "Guilda vs Guilda" virou "Duelos": o time de 3 antigo passa a ser o time do Duelo Equipe.
+      const legacy = data.guild as typeof data.guild & { gvgTeam?: string[] };
+      if (legacy.gvgTeam) {
+        legacy.duelTeams = { ...legacy.duelTeams, team: legacy.duelTeams?.team ?? legacy.gvgTeam };
+        delete legacy.gvgTeam;
+      }
       return data;
     } catch {
       return null;
@@ -160,6 +169,8 @@ export class GameState {
     const c = candidates.find((x) => x.id === candidateId);
     if (!c) return 'Este aventureiro não está mais disponível.';
     const cost = RECRUIT_COST[c.rank];
+    if (this.guild.adventurers.length >= this.adventurerLimit)
+      return `Dormitórios cheios (${this.adventurerLimit} aventureiros). Melhore os Dormitórios para recrutar mais.`;
     if (this.guild.gold < cost) return `Ouro insuficiente: precisa de ${cost}.`;
     this.guild.gold -= cost;
     addHistory(c, 'entrada', `Recrutado pela guilda por ${cost} de ouro`);
@@ -169,11 +180,46 @@ export class GameState {
     return null;
   }
 
+  upgradeLevel(id: UpgradeId): number {
+    return this.guild.upgrades?.[id] ?? 1;
+  }
+
+  /** Limite de aventureiros (Dormitórios). */
+  get adventurerLimit() {
+    return upgradeValue('dormitorios', this.upgradeLevel('dormitorios'));
+  }
+
+  /** Quantas missões ficam disponíveis no quadro. */
+  get missionSlots() {
+    return upgradeValue('quadro', this.upgradeLevel('quadro'));
+  }
+
+  /** Espaços de loot do inventário (Arsenal). */
+  get lootSlots() {
+    return upgradeValue('arsenal', this.upgradeLevel('arsenal'));
+  }
+
+  /** Compra o próximo nível de uma melhoria. Retorna uma mensagem de erro, ou null se deu certo. */
+  buyUpgrade(id: UpgradeId): string | null {
+    const level = this.upgradeLevel(id);
+    const cost = upgradeCost(id, level);
+    if (cost === null || level >= maxUpgradeLevel(id)) return `${UPGRADES[id].name} já está no nível máximo.`;
+    if (this.guild.gold < cost) return `Ouro insuficiente: precisa de ${cost}.`;
+    this.guild.gold -= cost;
+    this.guild.upgrades = { ...this.guild.upgrades, [id]: level + 1 };
+    this.save();
+    return null;
+  }
+
   /** Libera (dispensa) um aventureiro da guilda para sempre. */
   release(adventurerId: string): string | null {
     if (this.guild.adventurers.length <= 1) return 'A guilda precisa ter pelo menos 1 aventureiro.';
     this.guild.adventurers = this.guild.adventurers.filter((a) => a.id !== adventurerId);
-    this.guild.gvgTeam = this.guild.gvgTeam?.filter((id) => id !== adventurerId);
+    const teams = this.guild.duelTeams;
+    if (teams) {
+      teams.single = teams.single?.filter((id) => id !== adventurerId);
+      teams.team = teams.team?.filter((id) => id !== adventurerId);
+    }
     this.save();
     return null;
   }

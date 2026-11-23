@@ -53,7 +53,7 @@ A pasta `dist/` é um site estático: basta enviar o conteúdo dela para qualque
 ```
 public/assets/    imagens, sons e fontes
 src/main.ts       configuração do Phaser e lista de cenas
-src/scenes/       telas do jogo (cidades, criação da guilda, salão, recrutamento...)
+src/scenes/       telas do jogo (cidades, criação da guilda, salão, missões, recrutamento, duelos, inventário, melhorias)
 src/systems/      lógica do jogo (estado e save, aventureiros, relógio do jogo)
 src/ui/           componentes de interface (botões, barra superior, cartões...)
 src/data/         constantes e dados de balanceamento
@@ -86,3 +86,13 @@ Ficam em `src/systems/Combat.ts` (fórmulas e simulação de luta) e `src/data/c
 - **Velocidade** define a cadência: 30% de chance de 2 ataques na rodada, +5% a cada 10 de Velocidade (como o status vai de 0 a 10, é proporcional: +0,5% por ponto, máximo 35%). Quem tem mais Velocidade age primeiro; empate é sorteado.
 - Cada ataque gasta 10 de Stamina/Mana; o ataque duplo gasta o dobro (20). Sem recurso para o duplo, ataca uma vez; sem recurso nenhum, ataca uma vez com metade do dano.
 - Uma luta tem no máximo 50 rodadas; depois disso é empate.
+
+## Melhorias
+
+Compradas com ouro no salão (botão Melhorias). Valores em `src/data/upgrades.ts`.
+
+| Melhoria | Níveis (1 a 5) | Custo para subir |
+| --- | --- | --- |
+| Dormitórios (limite de aventureiros) | 6 / 10 / 15 / 20 / 30 | 300 / 800 / 2000 / 5000 |
+| Quadro de Missões (missões disponíveis) | 3 / 5 / 7 / 10 / 15 | 250 / 700 / 1800 / 4500 |
+| Arsenal (espaços de loot) | 16 / 24 / 32 / 40 / 48 | 200 / 600 / 1500 / 4000 |

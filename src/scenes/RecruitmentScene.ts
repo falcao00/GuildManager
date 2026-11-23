@@ -39,7 +39,7 @@ export class RecruitmentScene extends Phaser.Scene {
 
     const tabs: [Tab, string][] = [
       ['candidates', 'Candidatos de hoje'],
-      ['roster', `Seus aventureiros (${guild.adventurers.length})`],
+      ['roster', `Seus aventureiros (${guild.adventurers.length}/${state.adventurerLimit})`],
     ];
     tabs.forEach(([id, label], i) => {
       new Button(this, width / 2 + (i === 0 ? -150 : 150), top + 10, label, () => this.scene.restart({ tab: id }), {
@@ -70,6 +70,15 @@ export class RecruitmentScene extends Phaser.Scene {
       return;
     }
 
+    const full = state.guild.adventurers.length >= state.adventurerLimit;
+    if (full) {
+      this.add
+        .text(width / 2, y + 360, `Dormitórios cheios (${state.adventurerLimit} aventureiros). Melhore os Dormitórios em Melhorias para recrutar mais.`, {
+          ...FONT.body,
+          color: css(COLORS.danger),
+        })
+        .setOrigin(0.5);
+    }
     const cardW = 228;
     const gap = 14;
     const cardH = 280;
@@ -87,7 +96,7 @@ export class RecruitmentScene extends Phaser.Scene {
         const error = state.recruit(c.id);
         if (error) return toast(this, error, COLORS.danger);
         this.scene.restart({ tab: 'candidates' });
-      }, { width: cardW - 30, height: 38, primary: affordable }).setEnabled(affordable);
+      }, { width: cardW - 30, height: 38, primary: affordable && !full }).setEnabled(affordable && !full);
     });
   }
 

@@ -19,7 +19,7 @@ export type HeldItem = { id: string; name: string; quantity: number };
 export type AdventureRecord = {
   /** Quando aconteceu (ms, hora real). */
   at: number;
-  kind: 'entrada' | 'missao' | 'gvg' | 'rank';
+  kind: 'entrada' | 'missao' | 'duelo' | 'rank';
   text: string;
 };
 

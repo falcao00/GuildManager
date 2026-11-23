@@ -9,8 +9,9 @@ import { COLORS, FONT } from '../ui/theme';
 const ACTIVITIES = [
   { label: 'Missões', scene: 'Missions' },
   { label: 'Recrutamento', scene: 'Recruitment' },
-  { label: 'Guilda vs Guilda', scene: 'GuildVsGuild' },
+  { label: 'Duelos', scene: 'Duels' },
   { label: 'Inventário', scene: 'Inventory' },
+  { label: 'Melhorias', scene: 'Upgrades' },
 ];
 
 /** Tela principal: o salão da guilda. */
@@ -34,16 +35,20 @@ export class GuildHallScene extends Phaser.Scene {
     this.add.text(162, top + 72, `Guilda de ${getCity(state.data.city).name}`, FONT.small).setOrigin(0, 0.5);
     this.add.text(162, top + 100, `Ouro ${guild.gold}    Prestígio ${guild.prestige}    Aventureiros ${guild.adventurers.length}`, FONT.body).setOrigin(0, 0.5);
 
-    // Atividades: grade 2x2 no centro do espaço abaixo do cabeçalho
+    // Atividades: grade de pares (2 por linha) no centro do espaço abaixo do cabeçalho;
+    // se sobrar um botão sozinho na última linha, ele fica centralizado.
     const btnW = 340;
-    const btnH = 96;
-    const gap = 30;
+    const btnH = 84;
+    const gap = 24;
+    const rows = Math.ceil(ACTIVITIES.length / 2);
     const centerY = (top + 120 + this.scale.height) / 2;
+    const firstY = centerY - ((rows - 1) * (btnH + gap)) / 2;
     ACTIVITIES.forEach((act, i) => {
       const col = i % 2;
       const row = Math.floor(i / 2);
-      const x = width / 2 + (col === 0 ? -1 : 1) * (btnW + gap) / 2;
-      const y = centerY + (row === 0 ? -1 : 1) * (btnH + gap) / 2;
+      const alone = i === ACTIVITIES.length - 1 && col === 0;
+      const x = alone ? width / 2 : width / 2 + (col === 0 ? -1 : 1) * (btnW + gap) / 2;
+      const y = firstY + row * (btnH + gap);
       new Button(this, x, y, act.label, () => this.scene.start(act.scene), { width: btnW, height: btnH, fontSize: 24 });
     });
 
