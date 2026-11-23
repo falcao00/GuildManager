@@ -35,10 +35,6 @@ export type SaveData = {
   /** Quando a guilda foi fundada (ms). É o "Dia 01, Ano 01" do calendário do jogo. */
   foundedAt: number;
   recruitment?: RecruitmentData;
-  /** Escala dos status. Saves antigos (sem isso) usavam 0 a 10 e são convertidos para 0 a 100. */
-  statScale?: 100;
-  /** Escala da Vida. Saves antigos (sem isso) tinham Vida 10x menor e são convertidos. */
-  healthScale?: 10;
 };
 
 /** Um único save por jogador: uma guilda só, numa cidade só. */
@@ -69,8 +65,7 @@ export class GameState {
       if (!raw) return null;
       const data = JSON.parse(raw) as SaveData;
       data.foundedAt ??= Date.now();
-      GameState.migrateStatScale(data);
-      GameState.migrateHealthScale(data);
+      GameState.undoScaleExperiment(data);
       return data;
     } catch {
       return null;
@@ -93,8 +88,6 @@ export class GameState {
       energy: ENERGY_MAX,
       lastEnergyTick: now,
       foundedAt: now,
-      statScale: 100,
-      healthScale: 10,
     });
     GameState.current.save();
     return GameState.current;
@@ -110,29 +103,23 @@ export class GameState {
     GameState.current = null;
   }
 
-  /** Status passaram de 0-10 para 0-100: multiplica por 10 os status de saves antigos. */
-  private static migrateStatScale(data: SaveData) {
-    if (data.statScale === 100) return;
-    const all = [...data.guild.adventurers, ...(data.recruitment?.candidates ?? [])];
-    for (const a of all) {
-      for (const k of ['strength', 'speed', 'intelligence'] as const) {
-        if (a.stats) a.stats[k] *= 10;
-        for (const m of a.modifiers ?? []) if (m.stats[k] !== undefined) m.stats[k]! *= 10;
+  /**
+   * Por um tempo os status foram de 0 a 100 e a Vida foi 10x maior (statScale/healthScale no save).
+   * Isso foi desfeito: saves convertidos naquela época voltam para status 0 a 10 e Vida normal.
+   */
+  private static undoScaleExperiment(data: SaveData & { statScale?: number; healthScale?: number }) {
+    if (data.statScale === undefined && data.healthScale === undefined) return;
+    for (const a of [...data.guild.adventurers, ...(data.recruitment?.candidates ?? [])]) {
+      if (data.statScale === 100) {
+        for (const k of ['strength', 'speed', 'intelligence'] as const) {
+          if (a.stats) a.stats[k] = Math.round(a.stats[k] / 10);
+          for (const m of a.modifiers ?? []) if (m.stats[k] !== undefined) m.stats[k] = Math.round(m.stats[k]! / 10);
+        }
       }
+      if (data.healthScale === 10) a.health = Math.round(a.health / 10);
     }
-    data.statScale = 100;
-    GameState.save(data);
-  }
-
-  /** Vida passou a ser 10x maior (para acompanhar o dano dos status 0-100): multiplica a Vida atual de saves antigos. */
-  private static migrateHealthScale(data: SaveData) {
-    if (data.healthScale === 10) return;
-    for (const a of [...data.guild.adventurers, ...(data.recruitment?.candidates ?? [])]) a.health *= 10;
-    data.healthScale = 10;
-    GameState.save(data);
-  }
-
-  private static save(data: SaveData) {
+    delete data.statScale;
+    delete data.healthScale;
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
     } catch {

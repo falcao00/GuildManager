@@ -3,27 +3,7 @@ import { STAT_LABELS, type Stats } from '../data/adventurers';
 import { STAT_MAX } from '../data/config';
 import { COLORS, FONT } from './theme';
 
-/**
- * Cor da barra por faixa de 10 pontos: muda a cada 10 (0-9, 10-19, ... 90-99, 100),
- * indo do cinza ao dourado/vermelho para mostrar em que faixa o status está.
- */
-export const STAT_BAND_COLORS = [
-  0x6b6478, // 0-9
-  0x8a7f6a, // 10-19
-  0x9c8a4a, // 20-29
-  0x7fa04a, // 30-39
-  0x4aa05a, // 40-49
-  0x3fa59a, // 50-59
-  0x4a7bc9, // 60-69
-  0x8a5ad0, // 70-79
-  0xc95ab0, // 80-89
-  0xe0b04a, // 90-99
-  0xff6a3a, // 100
-];
-
-export const statBandColor = (v: number) => STAT_BAND_COLORS[Math.max(0, Math.min(STAT_BAND_COLORS.length - 1, Math.floor(v / 10)))];
-
-/** Barras de Força / Velocidade / Inteligência (0 a 100). */
+/** Barras de Força / Velocidade / Inteligência (0 a 10). */
 export class StatBars extends Phaser.GameObjects.Container {
   private bars: Record<keyof Stats, { fill: Phaser.GameObjects.Rectangle; value: Phaser.GameObjects.Text }>;
 
@@ -46,7 +26,6 @@ export class StatBars extends Phaser.GameObjects.Container {
   setStats(s: Stats) {
     for (const k of Object.keys(this.bars) as (keyof Stats)[]) {
       this.bars[k].fill.width = (this.barWidth * s[k]) / STAT_MAX;
-      this.bars[k].fill.setFillStyle(statBandColor(s[k]));
       this.bars[k].value.setText(String(s[k]));
     }
     return this;

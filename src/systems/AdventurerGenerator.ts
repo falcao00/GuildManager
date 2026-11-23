@@ -21,13 +21,13 @@ function shuffle<T>(list: readonly T[]): T[] {
   return a;
 }
 
-/** Status = típico da classe + raça, com variação aleatória de -10 a +10 em cada um (0 a 100). */
+/** Status = típico da classe + raça, com variação aleatória de -1 a +1 em cada um (0 a 10). */
 export function rollStats(classId: ClassId, raceId: RaceId): Stats {
   const t = typicalStats(classId, raceId);
   return {
-    strength: clampStat(t.strength + randInt(-10, 10)),
-    speed: clampStat(t.speed + randInt(-10, 10)),
-    intelligence: clampStat(t.intelligence + randInt(-10, 10)),
+    strength: clampStat(t.strength + randInt(-1, 1)),
+    speed: clampStat(t.speed + randInt(-1, 1)),
+    intelligence: clampStat(t.intelligence + randInt(-1, 1)),
   };
 }
 

@@ -37,20 +37,20 @@ export type ResourceType = 'stamina' | 'mana';
 export const RESOURCE_LABELS: Record<ResourceType, string> = { stamina: 'Stamina', mana: 'Mana' };
 
 export const CLASSES = {
-  guerreiro: { name: 'Guerreiro', resource: 'stamina', baseStats: { strength: 60, speed: 40, intelligence: 20 }, health: 1200, resourceMax: 100 },
-  ladino: { name: 'Ladino', resource: 'stamina', baseStats: { strength: 30, speed: 70, intelligence: 40 }, health: 900, resourceMax: 100 },
-  mago: { name: 'Mago', resource: 'mana', baseStats: { strength: 10, speed: 40, intelligence: 70 }, health: 700, resourceMax: 100 },
-  clerigo: { name: 'Clérigo', resource: 'mana', baseStats: { strength: 30, speed: 30, intelligence: 60 }, health: 900, resourceMax: 100 },
+  guerreiro: { name: 'Guerreiro', resource: 'stamina', baseStats: { strength: 6, speed: 4, intelligence: 2 }, health: 120, resourceMax: 100 },
+  ladino: { name: 'Ladino', resource: 'stamina', baseStats: { strength: 3, speed: 7, intelligence: 4 }, health: 90, resourceMax: 100 },
+  mago: { name: 'Mago', resource: 'mana', baseStats: { strength: 1, speed: 4, intelligence: 7 }, health: 70, resourceMax: 100 },
+  clerigo: { name: 'Clérigo', resource: 'mana', baseStats: { strength: 3, speed: 3, intelligence: 6 }, health: 90, resourceMax: 100 },
 } as const satisfies Record<string, { name: string; resource: ResourceType; baseStats: Stats; health: number; resourceMax: number }>;
 
 export type ClassId = keyof typeof CLASSES;
 
 // ---------- Raças ----------
 export const RACES = {
-  humano: { name: 'Humano', statBonus: { strength: 10, speed: 10, intelligence: 0 }, healthBonus: 0 },
-  elfo: { name: 'Elfo', statBonus: { strength: -10, speed: 10, intelligence: 20 }, healthBonus: -100 },
-  anao: { name: 'Anão', statBonus: { strength: 20, speed: -10, intelligence: 10 }, healthBonus: 200 },
-  goblin: { name: 'Goblin', statBonus: { strength: -10, speed: 20, intelligence: 10 }, healthBonus: -100 },
+  humano: { name: 'Humano', statBonus: { strength: 1, speed: 1, intelligence: 0 }, healthBonus: 0 },
+  elfo: { name: 'Elfo', statBonus: { strength: -1, speed: 1, intelligence: 2 }, healthBonus: -10 },
+  anao: { name: 'Anão', statBonus: { strength: 2, speed: -1, intelligence: 1 }, healthBonus: 20 },
+  goblin: { name: 'Goblin', statBonus: { strength: -1, speed: 2, intelligence: 1 }, healthBonus: -10 },
 } as const satisfies Record<string, { name: string; statBonus: Stats; healthBonus: number }>;
 
 export type RaceId = keyof typeof RACES;
