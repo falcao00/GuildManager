@@ -26,10 +26,10 @@ export function attackDamage(a: Combatant): number {
   return Math.max(meleeDamage(a), magicDamage(a));
 }
 
-/** Chance (0 a 1) de dar 2 ataques na rodada: 30% + 5% a cada 10 de Velocidade (proporcional). */
+/** Chance (0 a 1) de dar 2 ataques na rodada: 30% + 5% a cada 10 pontos completos de Velocidade. */
 export function doubleAttackChance(a: Combatant): number {
   const speed = effectiveStats(a).speed;
-  return DOUBLE_ATTACK_BASE + DOUBLE_ATTACK_BONUS_PER_10_SPEED * (speed / 10);
+  return DOUBLE_ATTACK_BASE + DOUBLE_ATTACK_BONUS_PER_10_SPEED * Math.floor(speed / 10);
 }
 
 /** Ordem de ação: maior Velocidade primeiro; empate é decidido no sorteio. */

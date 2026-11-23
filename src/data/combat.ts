@@ -19,11 +19,7 @@ export const MAGIC_MULTIPLIER: Record<ClassId, number> = {
 
 /** Chance base de dar 2 ataques na rodada. */
 export const DOUBLE_ATTACK_BASE = 0.3;
-/**
- * +5% de chance de ataque duplo a cada 10 de Velocidade.
- * Como a Velocidade vai de 0 a 10, a regra é aplicada de forma proporcional:
- * +0,5% por ponto (Velocidade 10 = 35%).
- */
+/** +5% de chance de ataque duplo a cada 10 pontos completos de Velocidade (Velocidade 100 = 80%). */
 export const DOUBLE_ATTACK_BONUS_PER_10_SPEED = 0.05;
 
 /** Stamina/Mana gasta por ataque (padrão). Ataque duplo gasta o dobro. */
