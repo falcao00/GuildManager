@@ -9,9 +9,12 @@ import { COLORS, FONT } from '../ui/theme';
 const ACTIVITIES = [
   { label: 'Missões', scene: 'Missions' },
   { label: 'Recrutamento', scene: 'Recruitment' },
+  { label: 'Campo de Treino', scene: 'Training' },
+  { label: 'Labirinto', scene: 'Labyrinth' },
   { label: 'Duelos', scene: 'Duels' },
   { label: 'Inventário', scene: 'Inventory' },
   { label: 'Melhorias', scene: 'Upgrades' },
+  { label: 'Correio', scene: 'Mail' },
 ];
 
 /** Tela principal: o salão da guilda. */
@@ -38,8 +41,8 @@ export class GuildHallScene extends Phaser.Scene {
     // Atividades: grade de pares (2 por linha) no centro do espaço abaixo do cabeçalho;
     // se sobrar um botão sozinho na última linha, ele fica centralizado.
     const btnW = 340;
-    const btnH = 84;
-    const gap = 24;
+    const btnH = 70;
+    const gap = 16;
     const rows = Math.ceil(ACTIVITIES.length / 2);
     const centerY = (top + 120 + this.scale.height) / 2;
     const firstY = centerY - ((rows - 1) * (btnH + gap)) / 2;
@@ -49,7 +52,7 @@ export class GuildHallScene extends Phaser.Scene {
       const alone = i === ACTIVITIES.length - 1 && col === 0;
       const x = alone ? width / 2 : width / 2 + (col === 0 ? -1 : 1) * (btnW + gap) / 2;
       const y = firstY + row * (btnH + gap);
-      new Button(this, x, y, act.label, () => this.scene.start(act.scene), { width: btnW, height: btnH, fontSize: 24 });
+      new Button(this, x, y, act.label, () => this.scene.start(act.scene), { width: btnW, height: btnH, fontSize: 22 });
     });
 
     const key = await loadEmblemTexture(this, guild.emblem);

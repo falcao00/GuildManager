@@ -53,7 +53,7 @@ A pasta `dist/` é um site estático: basta enviar o conteúdo dela para qualque
 ```
 public/assets/    imagens, sons e fontes
 src/main.ts       configuração do Phaser e lista de cenas
-src/scenes/       telas do jogo (cidades, criação da guilda, salão, missões, recrutamento, duelos, inventário, melhorias)
+src/scenes/       telas do jogo (cidades, criação da guilda, salão, missões, recrutamento, treino, labirinto, duelos, inventário, melhorias, correio)
 src/systems/      lógica do jogo (estado e save, aventureiros, relógio do jogo)
 src/ui/           componentes de interface (botões, barra superior, cartões...)
 src/data/         constantes e dados de balanceamento
@@ -96,3 +96,12 @@ Compradas com ouro no salão (botão Melhorias). Valores em `src/data/upgrades.t
 | Dormitórios (limite de aventureiros) | 6 / 10 / 15 / 20 / 30 | 300 / 800 / 2000 / 5000 |
 | Quadro de Missões (missões disponíveis) | 3 / 5 / 7 / 10 / 15 | 250 / 700 / 1800 / 4500 |
 | Arsenal (espaços de loot) | 16 / 24 / 32 / 40 / 48 | 200 / 600 / 1500 / 4000 |
+
+## Campo de Treino, Labirinto e Correio
+
+Valores em `src/data/activities.ts`.
+
+- **Campo de Treino:** custa 10 de energia e leva 4 horas reais; ao concluir, +1 no status escolhido (máximo 10).
+- **Labirinto (Dungeon Eterna):** entrar custa 10 de energia. A cada hora completa lá dentro o aventureiro acha ouro (D 5, C 8, B 12, A 18, S 25, SS 35 por hora) e tem 10% de chance de achar um item. Ao retirar, o ouro vai para a guilda e os itens ficam com o aventureiro.
+- Aventureiro treinando ou no Labirinto fica ocupado: não pode treinar de novo, duelar nem ser liberado.
+- **Correio:** caixa de entrada, enviadas e escrever. Ainda não há servidor: as outras guildas são fictícias e as mensagens ficam salvas só no navegador.

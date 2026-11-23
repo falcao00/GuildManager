@@ -50,6 +50,8 @@ export class DuelsScene extends Phaser.Scene {
 
     const toggle = (id: string) => {
       const i = team.indexOf(id);
+      const busy = guild.adventurers.find((x) => x.id === id)?.activity;
+      if (i < 0 && busy) return toast(this, 'Este aventureiro está ocupado (Campo de Treino ou Labirinto).', COLORS.danger);
       if (i >= 0) team.splice(i, 1);
       else if (size === 1) team.splice(0, team.length, id); // no 1x1, clicar em outro troca o duelista
       else if (team.length >= size) return toast(this, `O time já tem ${size} aventureiros. Tire um antes.`, COLORS.danger);
@@ -74,7 +76,7 @@ export class DuelsScene extends Phaser.Scene {
       row.on('pointerup', () => toggle(a.id));
       const s = effectiveStats(a);
       this.add.text(60, y, chosen ? '✔' : '○', { ...FONT.body, color: css(COLORS.gold) }).setOrigin(0, 0.5);
-      this.add.text(95, y, a.name, FONT.body).setOrigin(0, 0.5);
+      this.add.text(95, y, a.name + (a.activity ? '  (ocupado)' : ''), a.activity ? { ...FONT.body, color: css(COLORS.muted) } : FONT.body).setOrigin(0, 0.5);
       this.add.text(290, y, a.rank, { ...FONT.body, color: css(COLORS.gold) }).setOrigin(0, 0.5);
       this.add.text(340, y, `${CLASSES[a.classId].name} · ${RACES[a.raceId].name}`, FONT.small).setOrigin(0, 0.5);
       this.add.text(740, y, `${s.strength} / ${s.speed} / ${s.intelligence}`, FONT.body).setOrigin(1, 0.5);

@@ -19,7 +19,7 @@ export type HeldItem = { id: string; name: string; quantity: number };
 export type AdventureRecord = {
   /** Quando aconteceu (ms, hora real). */
   at: number;
-  kind: 'entrada' | 'missao' | 'duelo' | 'rank';
+  kind: 'entrada' | 'missao' | 'duelo' | 'rank' | 'treino' | 'labirinto';
   text: string;
 };
 
@@ -40,7 +40,21 @@ export type AdventurerData = {
   items?: HeldItem[];
   /** Histórico de aventuras, do mais antigo para o mais novo (saves antigos podem não ter). */
   history?: AdventureRecord[];
+  /** O que está fazendo agora. Sem isso, está livre no salão. */
+  activity?: AdventurerActivity;
 };
+
+export type AdventurerActivity =
+  | { kind: 'treino'; stat: keyof Stats; since: number; until: number }
+  | { kind: 'labirinto'; since: number };
+
+/** Adiciona um item ao loot carregado, somando a quantidade se já tiver. */
+export function addHeldItem(a: AdventurerData, name: string, quantity = 1) {
+  const items = (a.items ??= []);
+  const existing = items.find((it) => it.name === name);
+  if (existing) existing.quantity += quantity;
+  else items.push({ id: crypto.randomUUID(), name, quantity });
+}
 
 /** Registra um acontecimento no histórico do aventureiro. */
 export function addHistory(a: AdventurerData, kind: AdventureRecord['kind'], text: string, at = Date.now()) {

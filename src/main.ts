@@ -9,6 +9,9 @@ import { MissionsScene } from './scenes/MissionsScene';
 import { RecruitmentScene } from './scenes/RecruitmentScene';
 import { DuelsScene } from './scenes/DuelsScene';
 import { UpgradesScene } from './scenes/UpgradesScene';
+import { TrainingScene } from './scenes/TrainingScene';
+import { LabyrinthScene } from './scenes/LabyrinthScene';
+import { MailScene } from './scenes/MailScene';
 import { InventoryScene } from './scenes/InventoryScene';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -22,7 +25,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 1280,
     height: 720,
   },
-  scene: [BootScene, PreloadScene, CitySelectScene, GuildCreationScene, AdventurerCreationScene, GuildHallScene, MissionsScene, RecruitmentScene, DuelsScene, InventoryScene, UpgradesScene],
+  scene: [BootScene, PreloadScene, CitySelectScene, GuildCreationScene, AdventurerCreationScene, GuildHallScene, MissionsScene, RecruitmentScene, DuelsScene, InventoryScene, UpgradesScene, TrainingScene, LabyrinthScene, MailScene],
 };
 
 export default new Phaser.Game(config);

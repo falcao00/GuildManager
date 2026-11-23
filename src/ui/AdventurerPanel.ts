@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { CLASSES, RACES, RESOURCE_LABELS, XP_TO_NEXT_RANK } from '../data/adventurers';
 import { effectiveStats, maxHealth, maxResource, resourceType, type AdventurerData } from '../systems/Adventurer';
 import { formatGameDate, gameDate } from '../systems/GameClock';
-import { GameState } from '../systems/GameState';
+import { activityLabel, GameState } from '../systems/GameState';
 import { bar } from './AdventurerCard';
 import { Button } from './Button';
 import { StatBars } from './StatBars';
@@ -37,6 +37,7 @@ export function adventurerPanel(scene: Phaser.Scene, a: AdventurerData) {
     scene.add.rectangle(left + pw - 110, top + 40, 56, 40, COLORS.gold),
     scene.add.text(left + pw - 110, top + 40, a.rank, { ...FONT.heading, color: css(COLORS.bg) }).setOrigin(0.5),
     scene.add.text(left, top + 82, `${CLASSES[a.classId].name} · ${RACES[a.raceId].name}`, FONT.body).setOrigin(0, 0.5),
+    scene.add.text(left + pw - 60, top + 82, activityLabel(a), { ...FONT.small, color: css(a.activity ? COLORS.gold : COLORS.muted) }).setOrigin(1, 0.5),
   ]);
 
   // Coluna da esquerda: status e recursos
