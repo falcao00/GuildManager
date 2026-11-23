@@ -37,6 +37,8 @@ export type SaveData = {
   recruitment?: RecruitmentData;
   /** Escala dos status. Saves antigos (sem isso) usavam 0 a 10 e são convertidos para 0 a 100. */
   statScale?: 100;
+  /** Escala da Vida. Saves antigos (sem isso) tinham Vida 10x menor e são convertidos. */
+  healthScale?: 10;
 };
 
 /** Um único save por jogador: uma guilda só, numa cidade só. */
@@ -68,6 +70,7 @@ export class GameState {
       const data = JSON.parse(raw) as SaveData;
       data.foundedAt ??= Date.now();
       GameState.migrateStatScale(data);
+      GameState.migrateHealthScale(data);
       return data;
     } catch {
       return null;
@@ -91,6 +94,7 @@ export class GameState {
       lastEnergyTick: now,
       foundedAt: now,
       statScale: 100,
+      healthScale: 10,
     });
     GameState.current.save();
     return GameState.current;
@@ -117,6 +121,18 @@ export class GameState {
       }
     }
     data.statScale = 100;
+    GameState.save(data);
+  }
+
+  /** Vida passou a ser 10x maior (para acompanhar o dano dos status 0-100): multiplica a Vida atual de saves antigos. */
+  private static migrateHealthScale(data: SaveData) {
+    if (data.healthScale === 10) return;
+    for (const a of [...data.guild.adventurers, ...(data.recruitment?.candidates ?? [])]) a.health *= 10;
+    data.healthScale = 10;
+    GameState.save(data);
+  }
+
+  private static save(data: SaveData) {
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
     } catch {

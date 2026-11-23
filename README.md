@@ -74,7 +74,7 @@ Regras dos aventureiros ficam em `src/data/adventurers.ts` (status por classe e 
 
 ## Status e combate
 
-Força, Velocidade e Inteligência vão de 0 a 100. A barra de cada status muda de cor a cada faixa de 10 pontos.
+Força, Velocidade e Inteligência vão de 0 a 100. A barra de cada status muda de cor a cada faixa de 10 pontos. A Vida base é Guerreiro 1200, Ladino e Clérigo 900, Mago 700 (Anão +200, Elfo e Goblin -100), multiplicada pelo rank.
 
 Ficam em `src/systems/Combat.ts` (fórmulas e simulação de luta) e `src/data/combat.ts` (números de balanceamento).
 
