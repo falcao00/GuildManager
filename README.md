@@ -72,6 +72,10 @@ O jogo salva no `localStorage` do navegador (chave `guildmanager:save`). Para co
 
 Regras dos aventureiros ficam em `src/data/adventurers.ts` (status por classe e raça, ranks, XP). O sorteio fica em `src/systems/AdventurerGenerator.ts`. Preços de recrutamento e chances de rank por prestígio ficam em `src/data/recruitment.ts`.
 
+## Status
+
+Força, Velocidade e Inteligência vão de 0 a 10. Todo aventureiro novo (os 3 iniciais e os candidatos do Recrutamento) recebe os status sorteados de forma aleatória, somando sempre 15. Classe e raça não influenciam o sorteio. Depois disso os status só mudam por armas, armaduras, maldições e buffs.
+
 ## Regras de combate
 
 Ficam em `src/systems/Combat.ts` (fórmulas e simulação de luta) e `src/data/combat.ts` (números de balanceamento).
